@@ -60,6 +60,51 @@ Sub converter_tabela_12()
     Next oTable
 End Sub
 
+
+Sub converter_tabela_25()
+    '
+    ' converter_tabela_25 Macro
+    ' converte tabela para rtf 12cm ou 25cm
+    Dim iTblWidth As Integer
+    Dim iCount As Integer
+    For Each oTable In ActiveDocument.Tables
+        With oTable
+            oTable.Select
+            Selection.Font.Name = "Calibri"
+            Selection.Font.Grow
+            Selection.Font.Size = 9
+            Selection.Tables(1).Style = "Tabela com grade"
+            With Selection.ParagraphFormat
+                .LeftIndent = CentimetersToPoints(0)
+                .RightIndent = CentimetersToPoints(0)
+                .SpaceBefore = 0
+                .SpaceBeforeAuto = False
+                .SpaceAfter = 0
+                .SpaceAfterAuto = False
+                .LineSpacingRule = wdLineSpaceSingle
+                .WidowControl = False
+                .KeepWithNext = False
+                .KeepTogether = False
+                .PageBreakBefore = False
+                .NoLineNumber = False
+                .Hyphenation = True
+                .FirstLineIndent = CentimetersToPoints(0)
+                .OutlineLevel = wdOutlineLevelBodyText
+                .CharacterUnitLeftIndent = 0
+                .CharacterUnitRightIndent = 0
+                .CharacterUnitFirstLineIndent = 0
+                .LineUnitBefore = 0
+                .LineUnitAfter = 0
+                .MirrorIndents = False
+                .TextboxTightWrap = wdTightNone
+                .CollapsedByDefault = False
+            End With
+        End With
+        oTable.PreferredWidthType = wdPreferredWidthPoints
+        oTable.PreferredWidth = CentimetersToPoints(25)
+    Next oTable
+End Sub
+
 Sub converte_rodape()
     Dim i As Long, RngNt As Range, RngTxt As Range
     With ActiveDocument
@@ -883,6 +928,7 @@ End Sub
 Sub formata_dou()
     ' executa sub em sequência
     ' importante: acione os controles de revisão para verificar o que foi feito
+    ' TODO: mudar curly quotes por simple quotes
     Application.ScreenUpdating = False
     calibri9
     converter_tabela_12
@@ -891,4 +937,5 @@ Sub formata_dou()
     ordinal
     converte_rodape
     Application.ScreenUpdating = True
+    'Todo incluir message box
 End Sub
