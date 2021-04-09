@@ -32,7 +32,7 @@ Sub converter_tabela_12()
             Selection.Font.Grow
             Selection.Font.Size = 9
             'Selection.Tables(1).Style = "Tabela com grade"
-            Selection.Tables(1).Style = "Table Grid"
+            'Selection.Tables(1).Style = "Table Grid"
             With Selection.ParagraphFormat
                 .LeftIndent = CentimetersToPoints(0)
                 .RightIndent = CentimetersToPoints(0)
