@@ -1,20 +1,23 @@
+'TODO: Encontrar elementos gráficos
+
 Sub calibri9()
     ' converte fonte para calibri 9
     Selection.WholeStory
-    Selection.Font.Name = "Calibri"
-    Selection.Font.Size = 9
+    Selection.Range.ListFormat.ConvertNumbersToText
     '  essa parte de https://answers.microsoft.com/en-us/msoffice/forum/msoffice_word-mso_winother-mso_2016/ms-word-16-corrupted-bullet-and-numbering/38c049d5-7c02-4974-8e76-b046cf1916fe
     'Macro originally created by Doug Robbins, MVP
     'Customized by Stefan Blom, MVP, February 2020Dim LL As ListTemplate
-    Dim i As ListLevel
-    For Each LL In ActiveDocument.ListTemplates
-     For Each i In LL.ListLevels
-        If i.NumberStyle <> wdListNumberStyleBullet Then
-         i.Font.Name = "Calibri"
-         i.Font.Size = 9
-        End If
-     Next i
- Next LL
+    'Dim i As ListLevel
+    'For Each LL In ActiveDocument.ListTemplates
+    ' For Each i In LL.ListLevels
+    '    If i.NumberStyle <> wdListNumberStyleBullet Then
+    '     i.Font.Name = "Calibri"
+    '     i.Font.Size = 9
+    '    End If
+    ' Next i
+    'Next LL
+    Selection.Font.Name = "Calibri"
+    Selection.Font.Size = 9
 End Sub
 
 
@@ -89,7 +92,7 @@ Sub converter_tabela_25()
             Selection.Font.Grow
             Selection.Font.Size = 9
             'Selection.Tables(1).Style = "Tabela com grade"
-            Selection.Tables(1).Style = "Table Grid"
+            'Selection.Tables(1).Style = "Table Grid"
             With Selection.ParagraphFormat
                 .LeftIndent = CentimetersToPoints(0)
                 .RightIndent = CentimetersToPoints(0)
@@ -133,14 +136,15 @@ Sub converte_rodape()
                 End With
                 Set RngTxt = .Reference
                 With RngTxt
-                    .InsertAfter " [nota " & i & "] "
+                    .InsertAfter " <<nota " & i & ">> "
                     .Collapse wdCollapseEnd
-                    .InsertAfter " [\nota " & i & "] "
+                    .InsertAfter " <<\nota " & i & ">> "
                     .Collapse wdCollapseStart
                     .FormattedText = RngNt.FormattedText
                 End With
                 .Delete
             End With
+            MsgBox "Nota de rodapé convertida."
         Next
     End With
 End Sub
@@ -154,20 +158,6 @@ Sub nova_linha_tabela()
     Selection.MoveUp Unit:=wdLine, Count:=1, Extend:=wdExtend
     Selection.Borders(wdBorderHorizontal).LineStyle = wdLineStyleNone
 End Sub
-
-
-Public Function IsInArray(stringToBeFound As String, arr As Variant) As Boolean
-    Dim i
-    For i = LBound(arr) To UBound(arr)
-        If arr(i) = stringToBeFound Then
-            IsInArray = True
-            Exit Function
-        End If
-    Next i
-    IsInArray = False
-
-End Function
-
 
 Sub utf_para_simbolo()
     Dim myFont As String
@@ -581,61 +571,83 @@ Sub tabs()
     Selection.Find.Execute Replace:=wdReplaceAll
 End Sub
 
-Sub diacriticos()
-    '
-    ' substitui diacriticos
-    'Position    Decimal Name    Appearance
-    '0x0300  768 COMBINING GRAVE ACCENT  `
-    '0x0301  769 COMBINING ACUTE ACCENT  ´
-    '0x0302  770 COMBINING CIRCUMFLEX ACCENT ^
-    '0x0303  771 COMBINING TILDE ~
-    Selection.Find.ClearFormatting
-    Selection.Find.Replacement.ClearFormatting
-    With Selection.Find
-        .Text = "a" & ChrW(768)
-        .Replacement.Text = "à"
-        .Forward = True
-        .Wrap = wdFindContinue
-        .Format = False
-        .MatchCase = False
-        .MatchWholeWord = False
-        .MatchWildcards = False
-        .MatchSoundsLike = False
-        .MatchAllWordForms = False
-    End With
-    Selection.Find.Execute Replace:=wdReplaceAll
-    With Selection.Find
-        .Text = "a" & ChrW(770)
-        .Replacement.Text = "â"
-        .Forward = True
-        .Wrap = wdFindContinue
-        .Format = False
-        .MatchCase = False
-        .MatchWholeWord = False
-        .MatchWildcards = False
-        .MatchSoundsLike = False
-        .MatchAllWordForms = False
-    End With
-    Selection.Find.Execute Replace:=wdReplaceAll
-    With Selection.Find
-        ' por vezes tem um espaço em branco de tamanho nulo no início dos parágrafos
-        ' essa parte tenta eliminá-los
-        .Text = "^p "
-        .Replacement.Text = "^p"
-        .Forward = True
-        .Wrap = wdFindContinue
-        .Format = False
-        .MatchCase = False
-        .MatchWholeWord = False
-        .MatchWildcards = False
-        .MatchSoundsLike = False
-        .MatchAllWordForms = False
-    End With
-    Selection.Find.Execute Replace:=wdReplaceAll
+
+Sub equacoes()
+    Dim MathObj As Object
+    For Each MathObj In ActiveDocument.OMaths
+        MathObj.Remove
+    MsgBox "Equação encontrada e convertida para texto."
+    Next
+End Sub
+
+Sub imagens()
+    Dim i As Long
+    i = 1
+    For Each myStoryRange In ActiveDocument.StoryRanges
+        With myStoryRange.Find
+            .ClearFormatting
+            .Replacement.ClearFormatting
+            .Forward = True
+            .Wrap = wdFindContinue
+            .Text = "^g"
+            Do
+                .Replacement.Text = "<<IMAGEM " & i & " AQUI>>"
+                .Execute Replace:=wdReplaceOne
+                If .Found = True Then
+                    i = i + 1
+                    MsgBox "Imagem encontrada e substituida por " & .Replacement.Text
+                End If
+            Loop Until .Found = False
+        End With
+    Next myStoryRange
 End Sub
 
 
-
+Sub diacriticos()
+Dim i As Long
+Dim ArrFnd As Variant
+Dim ArrRepAgudo As Variant, ArrRepGrave As Variant
+Dim ArrRepCirc As Variant, ArrRepTilde As Variant
+ArrFnd = Array("a", "e", "i", "o", "u")
+ArrRepGrave = Array("à", "è", "ì", "ò", "ù")
+ArrRepAgudo = Array("á", "é", "í", "ó", "ú")
+ArrRepCirc = Array("â", "ê", "î", "ô", "û")
+ArrRepTilde = Array("ã", "~e", "~i", "õ", "~u")
+For Each myStoryRange In ActiveDocument.StoryRanges
+    With myStoryRange.Find
+    .ClearFormatting
+    .Replacement.ClearFormatting
+    .Forward = True
+    .Wrap = wdFindContinue
+    For i = 0 To 4
+    ' agudo
+    .Text = ArrFnd(i) & ChrW(769)
+    .Replacement.Text = ArrRepAgudo(i)
+    .Execute Replace:=wdReplaceAll
+    ' agudo vietnamita
+    .Text = ArrFnd(i) & ChrW(341)
+    .Replacement.Text = ArrRepAgudo(i)
+    .Execute Replace:=wdReplaceAll
+    ' grave
+    .Text = ArrFnd(i) & ChrW(768)
+    .Replacement.Text = ArrRepGrave(i)
+    .Execute Replace:=wdReplaceAll
+    ' grave vietnamita
+    .Text = ArrFnd(i) & ChrW(340)
+    .Replacement.Text = ArrRepGrave(i)
+    .Execute Replace:=wdReplaceAll
+    ' Tilde
+    .Text = ArrFnd(i) & ChrW(771)
+    .Replacement.Text = ArrRepTilde(i)
+    .Execute Replace:=wdReplaceAll
+    ' Circunflexo
+    .Text = ArrFnd(i) & ChrW(770)
+    .Replacement.Text = ArrRepCirc(i)
+    .Execute Replace:=wdReplaceAll
+    Next i
+    End With
+Next myStoryRange
+End Sub
 
 
 Sub indent()
@@ -657,32 +669,21 @@ Sub formata_dou()
     ' importante: acione os controles de revisão para verificar o que foi feito
     ' TODO: mudar curly quotes por simple quotes
     Application.ScreenUpdating = False
+    imagens
+    equacoes
+    converte_rodape
     calibri9
-    converter_tabela_12
     indent
     tabs
     ordinal
-    converte_rodape
+    diacriticos
     utf_para_simbolo
+    tabelas_sobrepostas
+    converter_tabela_12
     Application.ScreenUpdating = True
     'Todo incluir message box
 End Sub
 
-Sub formata_dou_25()
-    ' executa sub em sequência
-    ' importante: acione os controles de revisão para verificar o que foi feito
-    ' TODO: mudar curly quotes por simple quotes
-    Application.ScreenUpdating = False
-    calibri9
-    converter_tabela_25
-    indent
-    tabs
-    ordinal
-    converte_rodape
-    utf_para_simbolo
-    Application.ScreenUpdating = True
-    'Todo incluir message box
-End Sub
 
 Sub rtf2docx()
 '
@@ -745,38 +746,25 @@ Sub tabelas_sobrepostas()
     Dim NestedTable As Table
     For Each DocumentBodyTable In ActiveDocument.Tables
         For Each NestedTable In DocumentBodyTable.Tables
-            With NestedTable
-                For i = 1 To .Rows.Count Step 1
-                    .Rows(i).Shading.BackgroundPatternColor = RGB(255, 114, 118)
-                Next
-            End With
+                'NestedTable.Rows.Shading.BackgroundPatternColor = RGB(255, 114, 118)
+                NestedTable.Shading.BackgroundPatternColor = RGB(255, 114, 118)
+                'NestedTable.Cell(1, 1).Shading.BackgroundPatternColor = RGB(255, 114, 118)
+            MsgBox "Tabela sobreposta encontrada e marcada em vermelho."
         Next NestedTable
     Next DocumentBodyTable
-
 End Sub
 
-Sub Macro1()
-'
-' Macro1 Macro
-'
-'
-    Selection.MoveLeft Unit:=wdCharacter, Count:=1
-    Selection.MoveRight Unit:=wdCharacter, Count:=1
-    Selection.MoveRight Unit:=wdCharacter, Count:=2, Extend:=wdExtend
-    Selection.Copy
-    Selection.Find.ClearFormatting
-    Selection.Find.Replacement.ClearFormatting
-    With Selection.Find
-        .Text = " "artigo, "
-        .Replacement.Text = " "
-        .Forward = True
-        .Wrap = wdFindAsk
-        .Format = False
-        .MatchCase = False
-        .MatchWholeWord = False
-        .MatchWildcards = False
-        .MatchSoundsLike = False
-        .MatchAllWordForms = False
-    End With
-    Selection.Find.Execute Replace:=wdReplaceAll
+Sub tabelas_sobrepostas_para_texto()
+    ' ressalta em amarelo as tabelas sobrepostas (nested tables)
+    ' baseado em https://stackoverflow.com/a/39329012/143377
+    Dim DocumentBodyTable As Table
+    Dim NestedTable As Table
+    For Each DocumentBodyTable In ActiveDocument.Tables
+        For Each NestedTable In DocumentBodyTable.Tables
+            NestedTable.Rows.ConvertToText
+            MsgBox "Tabela sobreposta encontrada e convertida para texto."
+        Next NestedTable
+    Next DocumentBodyTable
 End Sub
+
+
