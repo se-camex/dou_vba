@@ -1,5 +1,3 @@
-'TODO: Encontrar elementos gráficos
-
 Sub calibri9()
     ' converte fonte para calibri 9
     Selection.WholeStory
@@ -31,7 +29,6 @@ Sub converter_tabela_12()
     For Each oTable In ActiveDocument.Tables
         With oTable
             oTable.Select
-            Selection.Font.Name = "Calibri"
             Selection.Font.Grow
             Selection.Font.Size = 9
             'Selection.Tables(1).Style = "Tabela com grade"
@@ -88,7 +85,6 @@ Sub converter_tabela_25()
     For Each oTable In ActiveDocument.Tables
         With oTable
             oTable.Select
-            Selection.Font.Name = "Calibri"
             Selection.Font.Grow
             Selection.Font.Size = 9
             'Selection.Tables(1).Style = "Tabela com grade"
@@ -496,7 +492,7 @@ Sub utf_para_simbolo()
                 End Select
                 If myChar.Text <> original Then
                     myChar.Font.Name = "Symbol"
-                    myChar.Shading.BackgroundPatternColor = RGB(255, 255, 0)
+                    'myChar.Shading.BackgroundPatternColor = RGB(255, 255, 0)
                 End If
             End If
             End If
@@ -746,9 +742,7 @@ Sub tabelas_sobrepostas()
     Dim NestedTable As Table
     For Each DocumentBodyTable In ActiveDocument.Tables
         For Each NestedTable In DocumentBodyTable.Tables
-                'NestedTable.Rows.Shading.BackgroundPatternColor = RGB(255, 114, 118)
                 NestedTable.Shading.BackgroundPatternColor = RGB(255, 114, 118)
-                'NestedTable.Cell(1, 1).Shading.BackgroundPatternColor = RGB(255, 114, 118)
             MsgBox "Tabela sobreposta encontrada e marcada em vermelho."
         Next NestedTable
     Next DocumentBodyTable
@@ -766,5 +760,3 @@ Sub tabelas_sobrepostas_para_texto()
         Next NestedTable
     Next DocumentBodyTable
 End Sub
-
-
