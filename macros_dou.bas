@@ -1,5 +1,6 @@
-Sub calibri9()
-    ' converte fonte para calibri 9
+Sub tamanho9()
+    ' converte fonte para tamanho 9
+    ' e converte a numeração automática para texto
     Selection.WholeStory
     Selection.Range.ListFormat.ConvertNumbersToText
     '  essa parte de https://answers.microsoft.com/en-us/msoffice/forum/msoffice_word-mso_winother-mso_2016/ms-word-16-corrupted-bullet-and-numbering/38c049d5-7c02-4974-8e76-b046cf1916fe
@@ -14,7 +15,7 @@ Sub calibri9()
     '    End If
     ' Next i
     'Next LL
-    Selection.Font.Name = "Calibri"
+    'Selection.Font.Name = "Calibri"
     Selection.Font.Size = 9
 End Sub
 
@@ -163,6 +164,7 @@ Sub utf_para_simbolo()
     For Each myChar In ActiveDocument.Characters
         i = i + 1
         If Not (myChar.Font.Name = "Symbol") Then
+            myChar.Font.Name = "Calibri"
             mycharN = AscW(myChar.Text)
             myCharNum = mycharN And &HFFFF&
             If (mycharN > 879 And mycharN < 1024) Or (mycharN > 2200) Or (mycharN = 215) Then
@@ -493,6 +495,8 @@ Sub utf_para_simbolo()
                 If myChar.Text <> original Then
                     myChar.Font.Name = "Symbol"
                     'myChar.Shading.BackgroundPatternColor = RGB(255, 255, 0)
+                Else
+                    myChar.Font.Name = "Calibri"
                 End If
             End If
             End If
@@ -572,7 +576,7 @@ Sub equacoes()
     Dim MathObj As Object
     For Each MathObj In ActiveDocument.OMaths
         MathObj.Remove
-    MsgBox "Equação encontrada e convertida para texto."
+        MsgBox "Equação encontrada e convertida para texto."
     Next
 End Sub
 
@@ -668,8 +672,8 @@ Sub formata_dou()
     imagens
     equacoes
     converte_rodape
-    calibri9
-    indent
+    tamanho9
+    indent 'verificar se está funcionando
     tabs
     ordinal
     diacriticos
@@ -760,3 +764,5 @@ Sub tabelas_sobrepostas_para_texto()
         Next NestedTable
     Next DocumentBodyTable
 End Sub
+
+
